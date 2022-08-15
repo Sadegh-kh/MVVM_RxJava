@@ -48,9 +48,11 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         }
 
         //Progress Bar=>
+        var count = 0
         val disposableProgressBar=mainViewModel.progressBarSubject.subscribe{
-            if (it){
+            if (it&&count==0){
                 binding.progressLoadStudentList.visibility=View.VISIBLE
+                count++
             }else{
                 binding.progressLoadStudentList.visibility=View.INVISIBLE
             }
