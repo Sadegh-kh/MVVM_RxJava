@@ -42,7 +42,7 @@
             android:fontFamily="@font/primary_bold"
             android:text="Fardin Aghadadashi"
             android:textColor="@color/black"
-            android:textSize="22sp"
+            android:textSize="18sp"
             app:layout_constraintStart_toEndOf="@+id/txtHarfAval"
             app:layout_constraintTop_toTopOf="@+id/txtHarfAval" />
 
