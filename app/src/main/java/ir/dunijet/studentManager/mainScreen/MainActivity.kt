@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.pedant.SweetAlert.SweetAlertDialog
@@ -40,11 +41,26 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         setSupportActionBar(binding.toolbarMain)
         viewModelMain = ViewModelMain()
 
+        initUi()
+    }
+
+    private fun initUi() {
+
         binding.btnAddStudent.setOnClickListener {
             val intent = Intent(this, MainActivity2::class.java)
             intent.putExtra(Constants.STUDENT_INSERT_KEY, listSize + 1)
             startActivity(intent)
         }
+
+        //Progress Bar=>
+        val disposableProgressBar=viewModelMain.progressBarSubject.subscribe{
+            if (it){
+                binding.progressLoadStudentList.visibility=View.VISIBLE
+            }else{
+                binding.progressLoadStudentList.visibility=View.GONE
+            }
+        }
+        compositeDisposable.add(disposableProgressBar)
     }
 
     override fun onResume() {

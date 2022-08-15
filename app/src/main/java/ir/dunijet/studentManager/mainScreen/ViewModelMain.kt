@@ -8,7 +8,7 @@ import ir.dunijet.studentManager.model.Student
 
 class ViewModelMain {
     private val mainRepository=MainRepository()
-    private val progressBarSubject=BehaviorSubject.create<Boolean>()
+    val progressBarSubject=BehaviorSubject.create<Boolean>()
 
     fun getAllStudent():Single<List<Student>>{
         progressBarSubject.onNext(true)
