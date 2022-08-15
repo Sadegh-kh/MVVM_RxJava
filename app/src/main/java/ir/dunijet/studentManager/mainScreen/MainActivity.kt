@@ -19,6 +19,7 @@ import ir.dunijet.studentManager.recycler.StudentAdapter
 import ir.dunijet.studentManager.util.Constants
 import ir.dunijet.studentManager.util.asyncRequest
 import ir.dunijet.studentManager.util.showToast
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
@@ -51,7 +52,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
             if (it){
                 binding.progressLoadStudentList.visibility=View.VISIBLE
             }else{
-                binding.progressLoadStudentList.visibility=View.GONE
+                binding.progressLoadStudentList.visibility=View.INVISIBLE
             }
         }
         compositeDisposable.add(disposableProgressBar)
