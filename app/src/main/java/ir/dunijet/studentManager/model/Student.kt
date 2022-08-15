@@ -1,4 +1,4 @@
-package ir.dunijet.studentManager.recycler
+package ir.dunijet.studentManager.model
 
 import android.os.Parcelable
 import androidx.room.Entity
