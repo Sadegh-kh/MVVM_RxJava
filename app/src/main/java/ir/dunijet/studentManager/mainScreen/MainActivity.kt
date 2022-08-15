@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     lateinit var myAdapter: StudentAdapter
     private var compositeDisposable = CompositeDisposable()
     lateinit var mainViewModel: MainViewModel
-    var listSize = 0
+    private var listSize = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     }
     fun setDataToRecycler(data: List<Student>) {
         val myData = ArrayList(data)
+        listSize=data.size
         myAdapter = StudentAdapter(myData, this)
         binding.recyclerMain.adapter = myAdapter
         binding.recyclerMain.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
