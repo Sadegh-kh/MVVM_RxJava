@@ -10,28 +10,22 @@ import androidx.recyclerview.widget.RecyclerView
 import cn.pedant.SweetAlert.SweetAlertDialog
 import io.reactivex.CompletableObserver
 import io.reactivex.SingleObserver
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
-import ir.dunijet.studentManager.addStudent.MainActivity2
+import ir.dunijet.studentManager.addStudent.AddStudentActivity
 import ir.dunijet.studentManager.databinding.ActivityMainBinding
-import ir.dunijet.studentManager.model.ApiService
 import ir.dunijet.studentManager.model.Student
 import ir.dunijet.studentManager.recycler.StudentAdapter
 import ir.dunijet.studentManager.util.Constants
 import ir.dunijet.studentManager.util.asyncRequest
 import ir.dunijet.studentManager.util.showToast
-import retrofit2.*
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
 
 
 class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     lateinit var binding: ActivityMainBinding
     lateinit var myAdapter: StudentAdapter
     private var compositeDisposable = CompositeDisposable()
-    lateinit var viewModelMain: ViewModelMain
+    lateinit var mainViewModel: MainViewModel
     var listSize = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +33,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbarMain)
-        viewModelMain = ViewModelMain()
+        mainViewModel = MainViewModel()
 
         initUi()
     }
@@ -47,13 +41,13 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     private fun initUi() {
 
         binding.btnAddStudent.setOnClickListener {
-            val intent = Intent(this, MainActivity2::class.java)
+            val intent = Intent(this, AddStudentActivity::class.java)
             intent.putExtra(Constants.STUDENT_INSERT_KEY, listSize + 1)
             startActivity(intent)
         }
 
         //Progress Bar=>
-        val disposableProgressBar=viewModelMain.progressBarSubject.subscribe{
+        val disposableProgressBar=mainViewModel.progressBarSubject.subscribe{
             if (it){
                 binding.progressLoadStudentList.visibility=View.VISIBLE
             }else{
@@ -66,7 +60,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     override fun onResume() {
         super.onResume()
 
-        viewModelMain
+        mainViewModel
             .getAllStudent()
             .asyncRequest()
             .subscribe(object : SingleObserver<List<Student>> {
@@ -95,7 +89,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     }
     private fun updateDataInServer(student: Student, position: Int) {
 
-        val intent = Intent(this, MainActivity2::class.java)
+        val intent = Intent(this, AddStudentActivity::class.java)
         intent.putExtra(Constants.STUDENT_UPDATE_KEY, student)
         startActivity(intent)
 
@@ -121,7 +115,7 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
 
         myAdapter.removeItem(student, position)
 
-        viewModelMain
+        mainViewModel
             .deleteStudent(student.id!!)
             .asyncRequest()
             .subscribe(object : CompletableObserver {

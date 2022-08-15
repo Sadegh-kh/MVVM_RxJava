@@ -18,7 +18,7 @@
         tools:replace="android:icon">
 
         <activity
-            android:name=".addStudent.MainActivity2"
+            android:name=".addStudent.AddStudentActivity"
             android:exported="false"
             android:windowSoftInputMode="stateVisible" />
 

@@ -6,7 +6,7 @@ import io.reactivex.subjects.BehaviorSubject
 import ir.dunijet.studentManager.model.MainRepository
 import ir.dunijet.studentManager.model.Student
 
-class ViewModelMain {
+class MainViewModel {
     private val mainRepository=MainRepository()
     val progressBarSubject=BehaviorSubject.create<Boolean>()
 
