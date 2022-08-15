@@ -1,6 +1,5 @@
 package ir.dunijet.studentManager.mainScreen
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,84 +7,66 @@ import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.pedant.SweetAlert.SweetAlertDialog
+import io.reactivex.CompletableObserver
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import ir.dunijet.studentManager.addStudent.MainActivity2
 import ir.dunijet.studentManager.databinding.ActivityMainBinding
-import ir.dunijet.studentManager.net.ApiService
-import ir.dunijet.studentManager.recycler.Student
+import ir.dunijet.studentManager.model.ApiService
+import ir.dunijet.studentManager.model.Student
 import ir.dunijet.studentManager.recycler.StudentAdapter
+import ir.dunijet.studentManager.util.Constants
+import ir.dunijet.studentManager.util.asyncRequest
+import ir.dunijet.studentManager.util.showToast
 import retrofit2.*
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 
-const val BASE_URL = "http://192.168.213.1:8080"
-
 class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
     lateinit var binding: ActivityMainBinding
     lateinit var myAdapter: StudentAdapter
-    lateinit var apiService: ApiService
-    lateinit var disposable: Disposable
-    var listSize=0
+    private var compositeDisposable = CompositeDisposable()
+    lateinit var viewModelMain: ViewModelMain
+    var listSize = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbarMain)
-
-        val retrofit = Retrofit
-            .Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .build()
-        apiService = retrofit.create(ApiService::class.java)
+        viewModelMain = ViewModelMain()
 
         binding.btnAddStudent.setOnClickListener {
             val intent = Intent(this, MainActivity2::class.java)
-            intent.putExtra("listSize",listSize+1)
+            intent.putExtra(Constants.STUDENT_INSERT_KEY, listSize + 1)
             startActivity(intent)
         }
-
-
     }
 
     override fun onResume() {
         super.onResume()
 
-        getDataFromApi()
-    }
-
-    private fun getDataFromApi() {
-
-        apiService
+        viewModelMain
             .getAllStudent()
-            .subscribeOn( Schedulers.io() )
-            .observeOn( AndroidSchedulers.mainThread() )
-            .subscribe( object :SingleObserver<List<Student>> {
-
+            .asyncRequest()
+            .subscribe(object : SingleObserver<List<Student>> {
                 override fun onSubscribe(d: Disposable) {
-                    disposable = d
+                    compositeDisposable.add(d)
                 }
 
                 override fun onSuccess(t: List<Student>) {
                     setDataToRecycler(t)
-                    listSize=t.size
-
                 }
 
                 override fun onError(e: Throwable) {
-                    Log.v("testLog" , e.message!!)
+                    Log.v("observerError", e.message!!)
                 }
-
-            } )
-
+            })
     }
-
     fun setDataToRecycler(data: List<Student>) {
         val myData = ArrayList(data)
         myAdapter = StudentAdapter(myData, this)
@@ -95,6 +76,13 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
 
     override fun onItemClicked(student: Student, position: Int) {
         updateDataInServer(student, position)
+    }
+    private fun updateDataInServer(student: Student, position: Int) {
+
+        val intent = Intent(this, MainActivity2::class.java)
+        intent.putExtra(Constants.STUDENT_UPDATE_KEY, student)
+        startActivity(intent)
+
     }
 
     override fun onItemLongClicked(student: Student, position: Int) {
@@ -113,31 +101,33 @@ class MainActivity : AppCompatActivity(), StudentAdapter.StudentEvent {
         }
         dialog.show()
     }
-
     private fun deleteDataFromServer(student: Student, position: Int) {
-
-        apiService
-            .deleteStudent(student.id!!)
-            .enqueue(object : Callback<String> {
-                override fun onResponse(call: Call<String>, response: Response<String>) {
-
-                }
-
-                override fun onFailure(call: Call<String>, t: Throwable) {
-
-                }
-            })
 
         myAdapter.removeItem(student, position)
 
+        viewModelMain
+            .deleteStudent(student.id!!)
+            .asyncRequest()
+            .subscribe(object : CompletableObserver {
+                override fun onSubscribe(d: Disposable) {
+                    compositeDisposable.add(d)
+                }
+
+                override fun onComplete() {
+                    showToast("Delete item success ")
+                }
+
+                override fun onError(e: Throwable) {
+                    showToast("i can't delete this item because : ${e.message}")
+                }
+            })
+
+
     }
 
-    private fun updateDataInServer(student: Student, position: Int) {
-
-        val intent = Intent(this, MainActivity2::class.java)
-        intent.putExtra("student", student)
-        startActivity(intent)
-
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.clear()
     }
 
 

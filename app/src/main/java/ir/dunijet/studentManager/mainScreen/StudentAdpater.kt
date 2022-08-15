@@ -5,8 +5,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import ir.dunijet.studentManager.databinding.ItemMainBinding
+import ir.dunijet.studentManager.model.Student
 
-class StudentAdapter(val data: ArrayList<Student>, val studentEvent: StudentEvent) :
+class StudentAdapter(private val data: ArrayList<Student>, val studentEvent: StudentEvent) :
     RecyclerView.Adapter<StudentAdapter.StudentViewHolder>() {
     lateinit var binding: ItemMainBinding
 
